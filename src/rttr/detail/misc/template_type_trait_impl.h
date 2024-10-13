@@ -126,26 +126,50 @@ namespace detail                                                                
 }                                                                                                                                                               \
 }
 
-#define RTTR_ADD_TYPE_TRAIT_SPECIALIZATION_4(value_type)                                                                                                        \
-namespace rttr                                                                                                                                                  \
-{                                                                                                                                                               \
-namespace detail                                                                                                                                                \
-{                                                                                                                                                               \
-                                                                                                                                                                \
-    template<template <value_type, value_type, typename, value_type > class T, typename T1, value_type N1, value_type N2, value_type N3>                                          \
-    struct template_type_trait<T<N1, N2, T1, N3>> : std::true_type                                                                                                  \
-    {                                                                                                                                                           \
-        static std::vector<::rttr::type> get_template_arguments() { return { ::rttr::type::get<N1>(), ::rttr::type::get<N2>(), ::rttr::type::get<T1>(), ::rttr::type::get<N3>() }; }     \
-    };                                                                                                                                                          \
-                                                                                                                                                                \
-}                                                                                                                                                               \
+// #define RTTR_ADD_TYPE_TRAIT_SPECIALIZATION_4(value_type)                                                                                                        \
+// namespace rttr                                                                                                                                                  \
+// {                                                                                                                                                               \
+// namespace detail                                                                                                                                                \
+// {                                                                                                                                                               \
+//                                                                                                                                                                 \
+//     template<template <value_type, value_type, typename, value_type > class T, typename T1, value_type N1, value_type N2, value_type N3>                                          \
+//     struct template_type_trait<T<N1, N2, T1, N3>> : std::true_type                                                                                                  \
+//     {                                                                                                                                                           \
+//         static std::vector<::rttr::type> get_template_arguments() { return { ::rttr::type::get<N1>(), ::rttr::type::get<N2>(), ::rttr::type::get<T1>(), ::rttr::type::get<N3>() }; }     \
+//     };                                                                                                                                                          \
+//     template<template <value_type, value_type, typename, typename > class T, typename T1, value_type N1, value_type N2, typename T2>                                          \
+//     struct template_type_trait<T<N1, N2, T1, T2>> : std::true_type                                                                                                  \
+//     {                                                                                                                                                           \
+//         static std::vector<::rttr::type> get_template_arguments() { return { ::rttr::type::get<N1>(), ::rttr::type::get<N2>(), ::rttr::type::get<T1>(), ::rttr::type::get<T2>() }; }     \
+//     };                                                                                                                                                          \
+//                                                                                                                                                                 \
+// }                                                                                                                                                               \
+// }
+
+
+namespace rttr
+{
+namespace detail
+{
+
+template<template <int, int, typename, int> class T, typename T1, int N1, int N2, int N3>
+struct template_type_trait<T<N1, N2, T1, N3>> : std::true_type
+{
+	static std::vector<::rttr::type> get_template_arguments() { return { ::rttr::type::get<N1>(), ::rttr::type::get<N2>(), ::rttr::type::get<T1>(), ::rttr::type::get<N3>() }; }
+};
+template<template <int, int, typename, typename > class T, typename T1, int N1, int N2, typename T2>
+struct template_type_trait<T<N1, N2, T1, T2>> : std::true_type
+{
+	static std::vector<::rttr::type> get_template_arguments() { return { ::rttr::type::get<N1>(), ::rttr::type::get<N2>(), ::rttr::type::get<T1>(), ::rttr::type::get<T2>() }; }
+};
+
+}
 }
 
 #define RTTR_ADD_TYPE_TRAIT_SPECIALIZATION(value_type)  \
 RTTR_ADD_TYPE_TRAIT_SPECIALIZATION_1(value_type)        \
 RTTR_ADD_TYPE_TRAIT_SPECIALIZATION_2(value_type)        \
-RTTR_ADD_TYPE_TRAIT_SPECIALIZATION_3(value_type)        \
-RTTR_ADD_TYPE_TRAIT_SPECIALIZATION_4(value_type)
+RTTR_ADD_TYPE_TRAIT_SPECIALIZATION_3(value_type)
 
 
 RTTR_ADD_TYPE_TRAIT_SPECIALIZATION(std::size_t)
