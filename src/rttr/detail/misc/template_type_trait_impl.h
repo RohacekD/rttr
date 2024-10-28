@@ -108,7 +108,7 @@ namespace detail                                                                
     template<template <value_type, value_type, typename > class T, typename T1, value_type N1, value_type N2>                                                   \
     struct template_type_trait<T<N1, N2, T1>> : std::true_type                                                                                                  \
     {                                                                                                                                                           \
-        static std::vector<::rttr::type> get_template_arguments() { return { ::rttr::type::get<N1>(), ::rttr::type::get<N2>(), ::rttr::type::get<T1>() }; }     \
+        static std::vector<::rttr::type> get_template_arguments() { return { ::rttr::type::get<value_type>(), ::rttr::type::get<value_type>(), ::rttr::type::get<T1>() }; }     \
     };                                                                                                                                                          \
                                                                                                                                                                 \
     template<template <value_type, typename, value_type > class T, typename T1, value_type N1, value_type N2>                                                   \
@@ -146,7 +146,7 @@ namespace detail                                                                
 // }                                                                                                                                                               \
 // }
 
-
+/*
 namespace rttr
 {
 namespace detail
@@ -164,7 +164,7 @@ struct template_type_trait<T<N1, N2, T1, T2>> : std::true_type
 };
 
 }
-}
+}*/
 
 #define RTTR_ADD_TYPE_TRAIT_SPECIALIZATION(value_type)  \
 RTTR_ADD_TYPE_TRAIT_SPECIALIZATION_1(value_type)        \
