@@ -105,6 +105,10 @@ public:
     flat_map<string_view, type>& get_orig_name_to_id();
     flat_map<std::string, type, hash>& get_custom_name_to_id();
 
+    //! Thread-safe name lookup. Unlike get_custom_name_to_id(), this takes the registry lock itself,
+    //! so it is safe to call while another thread is concurrently registering a type.
+    type get_by_name(string_view name);
+
     /////////////////////////////////////////////////////////////////////////////////////
 
     bool register_converter(const type_converter_base* converter);
