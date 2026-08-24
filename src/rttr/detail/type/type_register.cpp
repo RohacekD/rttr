@@ -487,11 +487,16 @@ type_data* type_register_private::register_name_if_neccessary(type_data* info)
 {
     using namespace detail;
 
+    // lookup and the insert below must happen as a single atomic step - this class can be
+    // reached concurrently (e.g. lazily-instantiated pointer/wrapper types get registered the first
+    // time they are used, which can happen from background loader threads). Locking only around the
+    // insert (as this used to do) still leaves a check-then-act race against both concurrent writers
+    // and any unlocked reader (see type::get_by_name()).
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     auto ret = m_orig_name_to_id.find(info->type_name);
     if (ret != m_orig_name_to_id.end())
         return ret->m_type_data;
-
-    std::lock_guard<std::mutex> lock(m_mutex);
 
     m_orig_name_to_id.insert(std::make_pair(info->type_name, type(info)));
     info->name = derive_name(type(info));
@@ -1118,6 +1123,22 @@ flat_map<string_view, type>& type_register_private::get_orig_name_to_id()
 flat_map<std::string, type, hash>& type_register_private::get_custom_name_to_id()
 {
     return m_custom_name_to_id;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+type type_register_private::get_by_name(string_view name)
+{
+    // NOTE: must lock - m_custom_name_to_id can be mutated concurrently by register_name_if_neccessary()
+    // and update_custom_name() from other threads (e.g. lazily-instantiated pointer/wrapper types
+    // registered by background loader threads).
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    auto ret = m_custom_name_to_id.find(name);
+    if (ret != m_custom_name_to_id.end())
+        return (*ret);
+
+    return get_invalid_type();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
