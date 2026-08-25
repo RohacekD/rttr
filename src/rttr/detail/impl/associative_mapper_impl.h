@@ -219,6 +219,34 @@ struct associative_container_mapper_wrapper : iterator_wrapper_base<Tp>
         return false;
     }
 
+    /////////////////////////////////////////////////////////////////////////
+
+    // Same dispatch as insert_key_value above, but extracts the value via argument::get_value<value_t&&>()
+    // so it binds to the move-taking insert_key_value(container_t&, const key_t&, value_t&&) overload.
+    template<typename..., typename V = value_t, enable_if_t<!std::is_void<V>::value && !std::is_const<ConstType>::value, int> = 0>
+    static bool insert_key_value_move(void* container, argument& key, argument& value, iterator_data& itr)
+    {
+        if (key.get_type() == ::rttr::type::get<key_t>() &&
+            value.get_type() == ::rttr::type::get<value_t>())
+        {
+            auto ret = base_class::insert_key_value(get_container(container), key.get_value<key_t>(), value.get_value<value_t&&>());
+            itr_wrapper::create(itr, ret.first);
+            return ret.second;
+        }
+        else
+        {
+            end(container, itr);
+            return false;
+        }
+    }
+
+    template<typename..., typename V = value_t, enable_if_t<std::is_void<V>::value || std::is_const<ConstType>::value, int> = 0>
+    static bool insert_key_value_move(void* container, argument& key, argument& value, iterator_data& itr)
+    {
+        end(container, itr);
+        return false;
+    }
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -339,6 +367,14 @@ struct associative_container_map_base : associative_container_base<T>
     {
         return container.insert(std::make_pair(key, value));
     }
+
+    // Move-taking overload: lets callers that hold a genuine temporary (e.g. a value just built up
+    // during deserialization) move it into the container instead of copying. Only participates in
+    // overload resolution for rvalues, so it cannot change behavior for any existing lvalue caller.
+    static std::pair<itr_t, bool> insert_key_value(container_t& container, const key_t& key, value_t&& value)
+    {
+        return container.insert(std::make_pair(key, std::move(value)));
+    }
 };
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -387,6 +423,12 @@ struct associative_container_base_multi : associative_container_base<T>
     static std::pair<itr_t, bool> insert_key_value(container_t& container, const key_t& key, const value_t& value)
     {
         return {container.insert(std::make_pair(key, value)), true};
+    }
+
+    // Move-taking overload, see associative_container_map_base::insert_key_value(..., value_t&&).
+    static std::pair<itr_t, bool> insert_key_value(container_t& container, const key_t& key, value_t&& value)
+    {
+        return {container.insert(std::make_pair(key, std::move(value))), true};
     }
 };
 

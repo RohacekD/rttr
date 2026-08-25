@@ -197,6 +197,33 @@ struct sequential_container_mapper_wrapper : iterator_wrapper_base<Tp>
     }
 
     /////////////////////////////////////////////////////////////////////////
+
+    // Same dispatch as insert above, but extracts the value via argument::get_value<value_t&&>()
+    // so it binds to a move-taking insert(container_t&, value_t&&, ...) overload when the concrete
+    // container mapper provides one (e.g. sequential_container_base_dynamic); mappers that don't
+    // (std::array, raw arrays, std::initializer_list, the fixed-size/no-op insert() specializations)
+    // simply keep resolving to the existing const value_t& overload, unaffected.
+    template<typename..., typename C = ConstType, enable_if_t<!std::is_const<C>::value, int> = 0>
+    static void insert_move(void* container, argument& value, const iterator_data& itr_pos, iterator_data& itr)
+    {
+        if (value.get_type() == ::rttr::type::get<value_t>())
+        {
+            auto ret = base_class::insert(get_container(container), value.get_value<value_t&&>(), itr_wrapper::get_iterator(itr_pos));
+            itr_wrapper::create(itr, ret);
+        }
+        else
+        {
+            end(container, itr);
+        }
+    }
+
+    template<typename..., typename C = ConstType, enable_if_t<std::is_const<C>::value, int> = 0>
+    static void insert_move(void* container, argument& value, const iterator_data& itr_pos, iterator_data& itr)
+    {
+        end(container, itr);
+    }
+
+    /////////////////////////////////////////////////////////////////////////
     // is_const<T> is used because of std::initializer_list, it can only return a constant value
     template<typename..., typename C = ConstType, typename ReturnType = decltype(base_class::get_value(std::declval<C&>(), 0)),
              enable_if_t<!std::is_const<C>::value &&
@@ -356,6 +383,20 @@ struct sequential_container_base_dynamic
     static itr_t insert(container_t& container, const value_t& value, const const_itr_t& itr_pos)
     {
         return container.insert(itr_pos, value);
+    }
+
+    // Move-taking overloads: let callers that hold a genuine temporary
+    // move it into the container instead of copying. Only participate in
+    // overload resolution for rvalues, so they cannot change behavior for
+    // any existing lvalue caller.
+    static itr_t insert(container_t& container, value_t&& value, const itr_t& itr_pos)
+    {
+        return container.insert(itr_pos, std::move(value));
+    }
+
+    static itr_t insert(container_t& container, value_t&& value, const const_itr_t& itr_pos)
+    {
+        return container.insert(itr_pos, std::move(value));
     }
 };
 

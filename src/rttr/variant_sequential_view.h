@@ -232,6 +232,17 @@ class RTTR_API variant_sequential_view
         const_iterator insert(const const_iterator& pos, argument value);
 
         /*!
+         * \brief Insert a value into the container, moving \p value into the container's storage
+         *        instead of copying it.
+         *
+         * \remark Only use this when \p value is a genuine temporary/about-to-be-discarded object -
+         *         after this call its state is unspecified, exactly as with any moved-from object.
+         *
+         * \return An iterator to the inserted element, otherwise an invalid iterator, when the insertion was not possible.
+         */
+        const_iterator insert_move(const const_iterator& pos, argument value);
+
+        /*!
          * \brief Removes the element (if one exists) at the position \p pos.
          *
          * \return Iterator following the last removed element.

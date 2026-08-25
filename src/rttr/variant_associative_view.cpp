@@ -151,6 +151,17 @@ std::pair<variant_associative_view::const_iterator, bool> variant_associative_vi
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
+std::pair<variant_associative_view::const_iterator, bool> variant_associative_view::insert_move(argument key, argument value)
+{
+    const_iterator itr(&m_view);
+
+    auto success = m_view.insert_move(key, value, itr.m_itr);
+
+    return {itr, success};
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
 variant_associative_view::const_iterator variant_associative_view::find(argument arg)
 {
     const_iterator itr(&m_view);

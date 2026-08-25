@@ -213,6 +213,18 @@ class RTTR_API variant_associative_view
         std::pair<const_iterator, bool> insert(argument key, argument value);
 
         /*!
+         * \brief Insert a key-value pair into the container, moving \p value into the container's
+         *        storage instead of copying it.
+         *
+         * \remark Only use this when \p value is a genuine temporary/about-to-be-discarded object -
+         *         after this call its state is unspecified, exactly as with any moved-from object.
+         *
+         * \return A pair consisting of an iterator to the inserted element (or to the element that prevented the insertion)
+         *         and a bool denoting whether the insertion took place.
+         */
+        std::pair<const_iterator, bool> insert_move(argument key, argument value);
+
+        /*!
          * \brief Finds an element with specific key \p key .
          *
          * \return The element with key equivalent to \p key. If no element is found an invalid iterator is returned.

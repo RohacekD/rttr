@@ -64,6 +64,7 @@ class RTTR_LOCAL variant_sequential_view_private
             m_erase_func(sequential_container_empty::erase),
             m_clear_func(sequential_container_empty::clear),
             m_insert_func(sequential_container_empty::insert),
+            m_insert_func_move(sequential_container_empty::insert),
             m_set_value_func(sequential_container_empty::set_value),
             m_get_value_func(sequential_container_empty::get_value)
         {
@@ -90,6 +91,7 @@ class RTTR_LOCAL variant_sequential_view_private
             m_erase_func(sequential_container_mapper_wrapper<RawType, ConstType>::erase),
             m_clear_func(sequential_container_mapper_wrapper<RawType, ConstType>::clear),
             m_insert_func(sequential_container_mapper_wrapper<RawType, ConstType>::insert),
+            m_insert_func_move(sequential_container_mapper_wrapper<RawType, ConstType>::insert_move),
             m_set_value_func(sequential_container_mapper_wrapper<RawType, ConstType>::set_value),
             m_get_value_func(sequential_container_mapper_wrapper<RawType, ConstType>::get_value)
         {
@@ -193,6 +195,11 @@ class RTTR_LOCAL variant_sequential_view_private
             m_insert_func(m_container, value, itr_pos, itr);
         }
 
+        RTTR_INLINE void insert_move(const iterator_data& itr_pos, argument& value, iterator_data& itr)
+        {
+            m_insert_func_move(m_container, value, itr_pos, itr);
+        }
+
         RTTR_INLINE bool set_value(std::size_t index, argument& arg)
         {
             return m_set_value_func(m_container, index, arg);
@@ -244,6 +251,7 @@ class RTTR_LOCAL variant_sequential_view_private
         erase_func              m_erase_func;
         clear_func              m_clear_func;
         insert_func             m_insert_func;
+        insert_func             m_insert_func_move;
         set_value_func          m_set_value_func;
         get_value_func          m_get_value_func;
 };

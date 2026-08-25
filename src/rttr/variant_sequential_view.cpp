@@ -154,6 +154,17 @@ variant_sequential_view::const_iterator variant_sequential_view::insert(const co
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
+variant_sequential_view::const_iterator variant_sequential_view::insert_move(const const_iterator& pos, argument value)
+{
+    const_iterator itr(&m_view);
+
+    m_view.insert_move(pos.m_itr, value, itr.m_itr);
+
+    return itr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
 variant_sequential_view::const_iterator variant_sequential_view::erase(const const_iterator& pos)
 {
     const_iterator itr(&m_view);

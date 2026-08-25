@@ -64,7 +64,8 @@ class RTTR_LOCAL variant_associative_view_private
             m_clear_func(associative_container_empty::clear),
             m_equal_range_func(associative_container_empty::equal_range),
             m_insert_func_key(associative_container_empty::insert_key),
-            m_insert_func_key_value(associative_container_empty::insert_key_value)
+            m_insert_func_key_value(associative_container_empty::insert_key_value),
+            m_insert_func_key_value_move(associative_container_empty::insert_key_value)
         {
         }
 
@@ -91,7 +92,8 @@ class RTTR_LOCAL variant_associative_view_private
             m_clear_func(associative_container_mapper_wrapper<RawType, ConstType>::clear),
             m_equal_range_func(associative_container_mapper_wrapper<RawType, ConstType>::equal_range),
             m_insert_func_key(associative_container_mapper_wrapper<RawType, ConstType>::insert_key),
-            m_insert_func_key_value(associative_container_mapper_wrapper<RawType, ConstType>::insert_key_value)
+            m_insert_func_key_value(associative_container_mapper_wrapper<RawType, ConstType>::insert_key_value),
+            m_insert_func_key_value_move(associative_container_mapper_wrapper<RawType, ConstType>::insert_key_value_move)
         {
         }
 
@@ -204,6 +206,11 @@ class RTTR_LOCAL variant_associative_view_private
             return m_insert_func_key_value(m_container, key, value, itr);
         }
 
+        RTTR_INLINE bool insert_move(argument& key, argument& value, iterator_data& itr)
+        {
+            return m_insert_func_key_value_move(m_container, key, value, itr);
+        }
+
     private:
         static bool equal_cmp_dummy_func(const iterator_data& lhs_itr, const iterator_data& rhs_itr) RTTR_NOEXCEPT;
         using equality_func     = decltype(&equal_cmp_dummy_func); // workaround because of 'noexcept' can only appear on function declaration
@@ -245,6 +252,7 @@ class RTTR_LOCAL variant_associative_view_private
         equal_range_func        m_equal_range_func;
         insert_func_key         m_insert_func_key;
         insert_func_key_value   m_insert_func_key_value;
+        insert_func_key_value   m_insert_func_key_value_move;
 };
 
 } // end namespace detail
